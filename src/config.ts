@@ -5,6 +5,7 @@ dotenv.config();
 export const lemonadeBackend =
   process.env.LEMONADE_BACKEND_SERVER_URL ||
   "https://backend.staging.lemonade.social/graphql/";
+
 export const oauthServerUrl =
   process.env.OAUTH_SERVER_URL || "https://oauth2.staging.lemonade.social/";
 export const oauthClientId = process.env.OAUTH_CLIENT_ID;
