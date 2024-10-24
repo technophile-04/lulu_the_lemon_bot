@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import { getHostingEvents } from "./services/lemonade.js";
+import { getMegaZuEvents } from "./services/lemonade.js";
 
 dotenv.config();
 
@@ -15,14 +15,8 @@ app.get(
   "/hosting-events",
   asyncHandler(async (req: any, res: any) => {
     try {
-      const skip = parseInt(req.query.skip as string) || 0;
-      const limit = parseInt(req.query.limit as string) || 10;
-
-      const events = await getHostingEvents({ skip, limit });
-      res.json({
-        success: true,
-        data: events,
-      });
+      const events = await getMegaZuEvents();
+      res.json(events);
     } catch (error: any) {
       console.error("Error fetching events:", error);
       res.status(500).json({

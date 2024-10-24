@@ -1,10 +1,12 @@
 import { gql } from "@apollo/client/core";
 
-export const getHostingEventsQuery = gql(`
-  query($skip: Int!, $limit: Int!) {
-    getHostingEvents(skip: $skip, limit: $limit) {
-      _id,
-      title,
+export const MEGA_ZU_EVENT_ID = "6715e00b4076387d98cadd87"; // MegaZu parent event ID
+
+export const getHostingEventsQuery = gql`
+  query {
+    getHostingEvents {
+      _id
+      title
       description
       start
       end
@@ -24,6 +26,7 @@ export const getHostingEventsQuery = gql(`
         broadcast
         description
       }
+      subevent_parent
       subevent_parent_expanded {
         title
         timezone
@@ -32,15 +35,38 @@ export const getHostingEventsQuery = gql(`
       }
     }
   }
-`);
+`;
 
-// TODO: Update the return type inline with the query
-export interface GetHostingEventsResponse {
-  getHostingEvents: Array<{
+export interface Event {
+  __typename: string;
+  _id: string;
+  title: string;
+  description: string;
+  start: string;
+  end: string;
+  url_go: string;
+  slug: string;
+  cover: string | null;
+  new_photos: { url: string }[];
+  guest_limit: number | null;
+  guest_limit_per: number | null;
+  sessions: {
+    title: string;
+    start: string;
+    end: string;
     _id: string;
-    name: string;
-    description: string;
-    start_time: string;
-    end_time: string;
-  }>;
+    broadcast?: boolean;
+    description?: string;
+  }[];
+  subevent_parent: string | null;
+  subevent_parent_expanded: {
+    title: string;
+    timezone: string;
+    state: string;
+    start: string;
+  } | null;
+}
+
+export interface GetHostingEventsResponse {
+  getHostingEvents: Event[];
 }
