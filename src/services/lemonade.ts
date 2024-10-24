@@ -63,7 +63,7 @@ export async function handleUpcomingEvents(ctx: any) {
         (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime(),
       );
 
-    const formattedMessage = formatEventMessage(megaZuEvents);
+    const formattedMessage = await formatEventMessage(megaZuEvents);
     await ctx.telegram.deleteMessage(ctx.chat.id, loadingMsg.message_id);
     await ctx.replyWithMarkdownV2(
       formattedMessage.replace(/[.!{}[\]()>#+\-=|{},]/g, "\\$&"),
@@ -88,7 +88,7 @@ export async function handleTodayEvents(ctx: any) {
     const today = new Date();
     const todayEvents = filterEventsByDate(events.data, today);
 
-    const formattedMessage = formatEventMessage(todayEvents, "Today's");
+    const formattedMessage = await formatEventMessage(todayEvents, "Today's");
     await ctx.telegram.deleteMessage(ctx.chat.id, loadingMsg.message_id);
     await ctx.replyWithMarkdownV2(
       formattedMessage.replace(/[.!{}[\]()>#+\-=|{},]/g, "\\$&"),
@@ -113,7 +113,10 @@ export async function handleTomorrowEvents(ctx: any) {
     const tomorrow = addDays(new Date(), 1);
     const tomorrowEvents = filterEventsByDate(events.data, tomorrow);
 
-    const formattedMessage = formatEventMessage(tomorrowEvents, "Tomorrow's");
+    const formattedMessage = await formatEventMessage(
+      tomorrowEvents,
+      "Tomorrow's",
+    );
     await ctx.telegram.deleteMessage(ctx.chat.id, loadingMsg.message_id);
     await ctx.replyWithMarkdownV2(
       formattedMessage.replace(/[.!{}[\]()>#+\-=|{},]/g, "\\$&"),
