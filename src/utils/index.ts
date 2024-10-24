@@ -12,12 +12,29 @@ interface Event {
   } | null;
 }
 
-export function formatEventMessage(events: Event[]): string {
+export function isSameDay(date1: Date, date2: Date): boolean {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  );
+}
+
+export function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+export function formatEventMessage(
+  events: Event[],
+  timeframe: string = "Upcoming",
+): string {
   if (events.length === 0) {
-    return "No upcoming events scheduled for MegaZu. Stay tuned! 🎯";
+    return `No ${timeframe.toLowerCase()} events scheduled for MegaZu. Stay tuned! 🎯`;
   }
 
-  let message = "🎉 *Upcoming MegaZu Events* 🎉\n\n";
+  let message = `🎉 *${timeframe} MegaZu Events* 🎉\n\n`;
   const timezone = "America/New_York";
 
   events.forEach((event, index) => {

@@ -1,7 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
 import { Telegraf } from "telegraf";
-import { getMegaZuEvents } from "./services/lemonade.js";
+import {
+  getMegaZuEvents,
+  handleTodayEvents,
+  handleTomorrowEvents,
+} from "./services/lemonade.js";
 import { formatEventMessage } from "./utils/index.js";
 
 dotenv.config();
@@ -55,20 +59,28 @@ async function handleUpcomingEvents(ctx: any) {
 // Bot commands
 bot.command("start", (ctx) => {
   ctx.reply(
-    "Welcome to MegaZu Events Bot! 🎉\nUse /upcoming to see the next events.",
+    "Welcome to MegaZu Events Bot! 🎉\n\nUse these commands to check events:\n" +
+      "/upcoming - See all upcoming events\n" +
+      "/today - See today's events\n" +
+      "/tomorrow - See tomorrow's events\n" +
+      "/help - Show all available commands",
   );
 });
 
 bot.command("help", (ctx) => {
   ctx.reply(
     "Available commands:\n" +
-      "/upcoming - See upcoming MegaZu events\n" +
+      "/upcoming - See all upcoming MegaZu events\n" +
+      "/today - See today's events\n" +
+      "/tomorrow - See tomorrow's events\n" +
       "/start - Start the bot\n" +
       "/help - Show this help message",
   );
 });
 
 bot.command("upcoming", handleUpcomingEvents);
+bot.command("today", handleTodayEvents);
+bot.command("tomorrow", handleTomorrowEvents);
 
 // Express routes
 const asyncHandler = (fn: any) => (req: any, res: any, next: any) => {
