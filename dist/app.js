@@ -10,110 +10,60 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import express from "express";
 import dotenv from "dotenv";
 import { Telegraf } from "telegraf";
-import { GraphQLClient, gql } from "graphql-request";
-import cron from "node-cron";
+import { handleTodayEvents, handleTomorrowEvents, handleUpcomingEvents, } from "./services/lemonade.js";
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
-app.use(express.json());
+// Constants
+export const MEGA_ZU_EVENT_ID = "6715e00b4076387d98cadd87";
 // Initialize Telegram bot
 const bot = new Telegraf(process.env.BOT_TOKEN);
-// Initialize GraphQL client
-const client = new GraphQLClient(process.env.LEMONADE_API_URL);
-// In-memory storage for user subscriptions (replace with a database in production)
-const userSubscriptions = {};
+// Bot commands with Lulu's personality
 bot.command("start", (ctx) => {
-    console.log("Starting the Lemonade bot!");
-    ctx.reply("Hey there, event enthusiast! 🎉🚀 I'm your Lemonade Event Reminder bot, here to keep you in the loop about awesome events! Here's how to stay updated:\n\n1️⃣ Use /notify <lemonade_user_id> to subscribe to a user's events\n2️⃣ I'll check for events daily and notify you about today's happenings\n3️⃣ Use /unsubscribe to stop notifications\n\nLet's make sure you never miss out on the fun! 🎈🥳", { reply_parameters: { message_id: ctx.message.message_id } });
+    ctx.reply("🍋 Heyyy! I'm Lulu the Lemon, your zesty friend from Lemonade Social! Ready to make your MegaZu experience extra sweet?\n\n" +
+        "Here's how you can squeeze the most out of me:\n\n" +
+        "🌟 /upcoming - Get a peek at all the juicy events coming up!\n" +
+        "🎯 /today - See what's fresh and happening today\n" +
+        "🔮 /tomorrow - Sneak a taste of tomorrow's lineup\n" +
+        "❓ /help - Need more juice? I got you!\n\n" +
+        "Let's make some sweet lemonade together! 🎉");
 });
-bot.command("notify", (ctx) => {
-    const args = ctx.message.text.split(" ");
-    if (args.length !== 2) {
-        return ctx.reply("Oops! Please use the format: /notify <lemonade_user_id>");
-    }
-    const lemonadeUserId = args[1];
-    const chatId = ctx.chat.id.toString();
-    userSubscriptions[chatId] = lemonadeUserId;
-    ctx.reply(`You're all set! 🎊 I'll notify you about events from user ${lemonadeUserId}. Get ready for some exciting updates! 🚀`);
+bot.command("help", (ctx) => {
+    ctx.reply("🍋 Lulu's Command Menu - Fresh Squeezed Just for You! 🍋\n\n" +
+        "🌟 /upcoming - All the zesty events on the horizon\n" +
+        "🎯 /today - Today's fresh batch of happenings\n" +
+        "🔮 /tomorrow - Tomorrow's sweet lineup\n" +
+        "🎉 /start - Reset our friendship (but why would you want to?)\n" +
+        "❓ /help - You're already here, you clever lemon! 🍋\n\n" +
+        "Made with 💖 by your friends at Lemonade Social");
 });
-bot.command("unsubscribe", (ctx) => {
-    const chatId = ctx.chat.id.toString();
-    if (userSubscriptions[chatId]) {
-        delete userSubscriptions[chatId];
-        ctx.reply("You've unsubscribed from event notifications. Feel free to subscribe again anytime! 👋");
-    }
-    else {
-        ctx.reply("You're not currently subscribed to any notifications. Use /notify <lemonade_user_id> to subscribe!");
-    }
-});
-const GET_TODAY_EVENTS = gql `
-  query GetTodayEvents($userId: ID!, $date: Date!) {
-    events(userId: $userId, date: $date) {
-      id
-      title
-      description
-      startTime
-    }
-  }
-`;
-function fetchTodayEvents(userId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const today = new Date().toISOString().split("T")[0];
-        try {
-            const data = (yield client.request(GET_TODAY_EVENTS, {
-                userId,
-                date: today,
-            }));
-            return data.events;
-        }
-        catch (error) {
-            console.error("Error fetching events:", error);
-            return [];
-        }
-    });
-}
-function sendDailyNotifications() {
-    return __awaiter(this, void 0, void 0, function* () {
-        for (const [chatId, userId] of Object.entries(userSubscriptions)) {
-            try {
-                const events = yield fetchTodayEvents(userId);
-                if (events.length > 0) {
-                    let message = `🎉 Today's Awesome Events! 🎉\n\n`;
-                    events.forEach((event) => {
-                        message += `🔸 ${event.title}\n   🕒 ${event.startTime}\n   📝 ${event.description}\n\n`;
-                    });
-                    bot.telegram.sendMessage(chatId, message);
-                }
-            }
-            catch (error) {
-                console.error(`Failed to fetch events for user ${userId}:`, error);
-            }
-        }
-    });
-}
-// Schedule daily notifications
-cron.schedule("0 8 * * *", sendDailyNotifications);
-// Express routes
-app.get("/", (_req, res) => {
-    res.send("Lemonade Event Reminder bot is ready to keep you in the loop! 🍋🎉");
-});
-// Start server and bot
+bot.command("upcoming", handleUpcomingEvents);
+bot.command("today", handleTodayEvents);
+bot.command("tomorrow", handleTomorrowEvents);
+// Start server and bot with Lulu's personality
 function startApp() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Start Express server
             app.listen(port, () => {
-                console.log(`Server is pumped up on port ${port} 💪`);
+                console.log("🍋 Lulu's juice bar is open at http://localhost:" + port);
+                console.log("🍋 Get fresh events at http://localhost:" + port + "/hosting-events");
             });
             // Start Telegram bot
             yield bot.launch();
-            console.log("Lemonade bot is online and ready to spread the event hype!");
+            console.log("🍋 Lulu the Lemon is awake and ready to serve some zesty events!");
             // Enable graceful stop
-            process.once("SIGINT", () => bot.stop("SIGINT"));
-            process.once("SIGTERM", () => bot.stop("SIGTERM"));
+            process.once("SIGINT", () => {
+                console.log("🍋 Lulu's taking a quick nap! See you soon!");
+                bot.stop("SIGINT");
+            });
+            process.once("SIGTERM", () => {
+                console.log("🍋 Lulu's heading to bed! Catch you on the flip side!");
+                bot.stop("SIGTERM");
+            });
         }
         catch (error) {
-            console.error("Failed to start the application:", error);
+            console.error("🍋 Oh no! Lulu stumbled:", error);
             process.exit(1);
         }
     });
