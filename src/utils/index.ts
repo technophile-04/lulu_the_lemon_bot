@@ -1,4 +1,3 @@
-import { formatDistance } from "date-fns";
 import { format, toZonedTime } from "date-fns-tz";
 
 interface Event {
@@ -34,7 +33,7 @@ export function formatEventMessage(
     return `No ${timeframe.toLowerCase()} events scheduled for MegaZu. Stay tuned! 🎯`;
   }
 
-  let message = `🎉 *${timeframe} MegaZu Events* 🎉\n\n`;
+  let message = `🎉 ${timeframe} MegaZu Events 🎉\n\n`;
   const timezone = "America/New_York";
 
   events.forEach((event, index) => {
@@ -42,15 +41,9 @@ export function formatEventMessage(
     const startDate = toZonedTime(event.start, timezone);
     const endDate = toZonedTime(event.end, timezone);
 
-    // Calculate time until using UTC date for correct difference
-    const timeUntil = formatDistance(new Date(event.start), new Date(), {
-      addSuffix: true,
-    });
-
     message += `*${index + 1}. ${event.title}*\n`;
     message += `📅 ${format(startDate, "MMM d, yyyy", { timeZone: timezone })}\n`;
     message += `⏰ ${format(startDate, "hh:mm aa", { timeZone: timezone })} - ${format(endDate, "hh:mm aa", { timeZone: timezone })}\n`;
-    message += `🕐 Starts ${timeUntil}\n`;
 
     if (event.description) {
       const truncatedDesc =
@@ -60,9 +53,14 @@ export function formatEventMessage(
       message += `📝 ${truncatedDesc}\n`;
     }
 
-    message += `🔗 [Join Event](${event.url_go})\n\n`;
+    // Add URL as plain text instead of markdown link
+    if (event.url_go) {
+      message += `🔗 ${event.url_go}\n`;
+    }
+
+    message += "\n";
   });
 
-  message += "\nUse /help to learn more about MegaZu events! 🚀";
-  return message;
+  // Removed the help command line
+  return message.trim();
 }
