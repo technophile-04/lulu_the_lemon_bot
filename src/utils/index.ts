@@ -83,45 +83,38 @@ export async function formatEventMessage(
     return `🍋 Aww snap! No ${timeframe.toLowerCase()} plans yet! Don't worry fam, your boy Lulu will keep you posted when the juice starts flowing! 🎯`;
   }
 
-  // Get random intro message based on timeframe
   const intros =
     INTRO_MESSAGES[timeframe as keyof typeof INTRO_MESSAGES] ||
     INTRO_MESSAGES.Upcoming;
   const randomIntro = intros[Math.floor(Math.random() * intros.length)];
-
   let message = `${randomIntro}\n\n`;
-  const timezone = "America/New_York";
 
-  // Process events
+  // Use Asia/Bangkok timezone as specified in the event data
+  const timezone = "Asia/Bangkok";
+
   for (let i = 0; i < events.length; i++) {
     const event = events[i];
-    const startDate = toZonedTime(event.start, timezone);
-    const endDate = toZonedTime(event.end, timezone);
 
-    const timeUntil = formatDistance(new Date(event.start), new Date(), {
-      addSuffix: true,
-    });
+    // Convert UTC dates to Bangkok time
+    const startDate = toZonedTime(new Date(event.start), timezone);
+    const endDate = toZonedTime(new Date(event.end), timezone);
 
     message += `*${i + 1}. ${event.title}*\n`;
     message += `📅 ${format(startDate, "MMM d, yyyy", { timeZone: timezone })}\n`;
-    message += `⏰ ${format(startDate, "hh:mm aa", { timeZone: timezone })} - ${format(endDate, "hh:mm aa", { timeZone: timezone })}\n`;
+    message += `⏰ ${format(startDate, "HH:mm", { timeZone: timezone })} - ${format(endDate, "HH:mm", { timeZone: timezone })} (Bangkok Time)\n`;
 
     if (event.description) {
-      // Get AI-powered summary
       const summary = await summarizeDescription(event.description);
       message += `📝 ${summary}\n`;
     }
-
     message += "\n";
 
     if (event.url_go) {
       message += `🔗 ${event.url_go}\n`;
     }
-
     message += "\n";
   }
 
-  // Add random closing message
   const closingMessages = [
     "Stay fresh, stay zesty! 🍋",
     "Time to make lemonade! 🍋",
@@ -132,6 +125,5 @@ export async function formatEventMessage(
 
   message +=
     closingMessages[Math.floor(Math.random() * closingMessages.length)];
-
   return message.trim();
 }
