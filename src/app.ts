@@ -12,7 +12,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Constants
-export const MEGA_ZU_EVENT_ID = "6715e00b4076387d98cadd87";
+export const ZU_THAILAND_EVENT_ID = "670977cc0f6b7c0c750c9784";
 
 // Initialize Telegram bot
 const bot = new Telegraf(process.env.BOT_TOKEN!);
